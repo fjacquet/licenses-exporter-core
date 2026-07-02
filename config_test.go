@@ -84,9 +84,38 @@ func TestBaseValidateRejectsNonPositiveInterval(t *testing.T) {
 	if err := (Base{}).Validate(); err == nil {
 		t.Fatal("expected error for zero interval")
 	}
+	negative := Base{Collection: CollectionConfig{Interval: -1 * time.Hour}}
+	if err := negative.Validate(); err == nil {
+		t.Fatal("expected error for negative interval")
+	}
 	valid := Base{Collection: CollectionConfig{Interval: time.Hour}}
 	if err := valid.Validate(); err != nil {
 		t.Fatalf("Validate: unexpected error: %v", err)
+	}
+}
+
+// TestLoadDotEnvDoesNotOverrideRealEnv proves the security-relevant invariant
+// that an already-set real environment variable always wins over a value
+// committed to a .env file: injected secrets must never be shadowed by
+// defaults checked into source control.
+func TestLoadDotEnvDoesNotOverrideRealEnv(t *testing.T) {
+	const key = "LEC_DOTENV_PROBE"
+	t.Setenv(key, "fromreal")
+
+	dir := t.TempDir()
+	envFile := filepath.Join(dir, ".env")
+	if err := os.WriteFile(envFile, []byte(key+"=fromfile\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	cfgPath := filepath.Join(dir, "config.yaml")
+	if err := os.WriteFile(cfgPath, []byte("collection:\n  interval: 1h\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	LoadDotEnv(cfgPath)
+
+	if got := os.Getenv(key); got != "fromreal" {
+		t.Fatalf("LoadDotEnv overrode real env: got %q, want %q", got, "fromreal")
 	}
 }
 

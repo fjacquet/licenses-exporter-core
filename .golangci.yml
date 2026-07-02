@@ -1,0 +1,33 @@
+version: "2"
+
+linters:
+  enable:
+    - gosec
+    - revive
+    - misspell
+    - unconvert
+  settings:
+    revive:
+      # Keep revive's default rule set active but drop the two doc-comment
+      # rules for now: the engine is extracted verbatim from licenses_exporter,
+      # which shipped without exported/package comments repo-wide. Re-enable
+      # once a documentation pass adds the missing comments.
+      enable-default-rules: true
+      rules:
+        - name: exported
+          disabled: true
+        - name: package-comments
+          disabled: true
+  exclusions:
+    rules:
+      # Reading operator-supplied paths is intended: the passwordFile /
+      # clientSecretFile secret refs funnel through config the operator
+      # controls (config.go, arriving in a later task). The family standard
+      # forbids inline //nolint, so the G304 exclusion is path-scoped here.
+      - path: config.go
+        linters: [gosec]
+        text: "G304"
+      # Test mocks intentionally write static fixtures to ResponseWriter; test
+      # signatures keep the standard (t *testing.T) param even when unused.
+      - path: _test\.go
+        linters: [gosec, revive]

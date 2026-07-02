@@ -1,0 +1,23 @@
+# build artifacts
+*.out
+coverage.html
+
+# logs
+*.log
+
+# local secrets
+.env
+*.local.yaml
+.claude.local.md
+.claude/settings.local.json
+
+# editor / OS
+.DS_Store
+.idea/
+.vscode/
+
+# rtk
+.rtk/
+
+# sdd ledger (scratch)
+.superpowers/

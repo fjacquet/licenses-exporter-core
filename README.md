@@ -85,8 +85,10 @@ collection loop on reload — `/metrics` never blanks and the socket never rebin
 
 ## Versioning
 
-`v0.1.x` while the API settles against the first consumer; promoted to `v1.0.0`
-once a second independent consumer compiles against it unchanged.
+Semantic versioning. **v1.0.0** — the public API is stable, validated by two
+independent consumers (`m365_licenses_exporter` and `vmware_licenses_exporter`)
+compiling against it unchanged. The `v0.1.x` line was the API-settling window
+against the first consumer.
 
 ## License
 

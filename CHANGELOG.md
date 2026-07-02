@@ -6,6 +6,14 @@ All notable changes to this module are documented here. The format is based on
 `0.x` window (promoted to `v1.0.0` once a second independent consumer compiles
 against it unchanged).
 
+## [1.0.0] — 2026-07-02
+
+Stable API. No code changes from `v0.1.0` — this release marks the public API as
+stable after a **second independent consumer** (`vmware_licenses_exporter`) compiled
+against it unchanged, joining the first (`m365_licenses_exporter`). The `Source`
+seam, `Sample` constructors, `Base`/`LoadYAML`, `Server`, and `App`/`Main` entry
+point are now covered by semantic-versioning stability guarantees.
+
 ## [0.1.0] — 2026-07-02
 
 Initial release: the vendor-neutral engine extracted from `licenses_exporter`

@@ -19,6 +19,36 @@ func (f *fakeSource) Collect(context.Context) ([]Sample, error) {
 	return f.samples, f.err
 }
 
+// gatedSource is a fake Source with deterministic coordination hooks: started
+// signals (once) when Collect is entered, and release (when non-nil) blocks
+// Collect until closed/received — letting a test observe the shared store
+// while a reload's first CollectOnce is mid-flight.
+type gatedSource struct {
+	vendor, instance string
+	samples          []Sample
+	started          chan struct{} // buffered(1); nil to skip
+	release          chan struct{} // nil => return immediately
+}
+
+func (g *gatedSource) Vendor() string   { return g.vendor }
+func (g *gatedSource) Instance() string { return g.instance }
+func (g *gatedSource) Collect(ctx context.Context) ([]Sample, error) {
+	if g.started != nil {
+		select {
+		case g.started <- struct{}{}:
+		default:
+		}
+	}
+	if g.release != nil {
+		select {
+		case <-g.release:
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		}
+	}
+	return g.samples, nil
+}
+
 func TestFakeSourceImplementsSource(t *testing.T) {
 	var _ Source = (*fakeSource)(nil)
 

@@ -1,18 +1,20 @@
 # Canonical Go Makefile — fjacquet/ci standard interface (do not rename targets).
-# This module is a LIBRARY: no binary, no release, no SBOM, no Docker targets.
+# This module is a LIBRARY: no binary, no release, no Docker targets.
 .DEFAULT_GOAL := all
 COVER   ?= coverage.out
+DIST    ?= dist
 
 # Pinned tool versions (installed by `make tools`).
 GOLANGCI_VERSION ?= v2.12.2
 
-.PHONY: all clean install tools lint format test build vuln security ci \
+.PHONY: all clean install tools lint format test build vuln security sbom ci \
         fmt-check fmt vet test-race test-coverage sure
 
 all: clean lint test build
 
 clean:
 	rm -f $(COVER) coverage.html *.sarif
+	rm -rf $(DIST)
 
 install:
 	go mod download
@@ -39,6 +41,11 @@ vuln:
 
 security:  # advisory: reports findings but never blocks the build (CodeQL/osv are the blocking gates)
 	uvx semgrep scan --config auto --skip-unknown-extensions || true
+
+# Software Bill of Materials (CycloneDX) — required by the shared go-ci workflow.
+sbom:
+	mkdir -p $(DIST)
+	go run github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@latest mod -json -output $(DIST)/sbom.cdx.json
 
 # Aggregate gate run by CI.
 ci: lint test build vuln

@@ -7,8 +7,8 @@ DIST    ?= dist
 # Pinned tool versions (installed by `make tools`).
 GOLANGCI_VERSION ?= v2.12.2
 
-.PHONY: all clean install tools lint format test build vuln security sbom ci \
-        fmt-check fmt vet test-race test-coverage sure
+.PHONY: all clean install tools lint format test build vuln security sbom \
+        coverage-upload ci fmt-check fmt vet test-race test-coverage sure
 
 all: clean lint test build
 
@@ -46,6 +46,10 @@ security:  # advisory: reports findings but never blocks the build (CodeQL/osv a
 sbom:
 	mkdir -p $(DIST)
 	go run github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@latest mod -json -output $(DIST)/sbom.cdx.json
+
+# Upload coverage to Codecov — required by the shared go-ci workflow (never blocks).
+coverage-upload:
+	uvx --from codecov-cli codecov upload-process --file $(COVER) || true
 
 # Aggregate gate run by CI.
 ci: lint test build vuln

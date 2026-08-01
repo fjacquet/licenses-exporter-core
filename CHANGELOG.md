@@ -6,6 +6,32 @@ All notable changes to this module are documented here. The format is based on
 `0.x` window (promoted to `v1.0.0` once a second independent consumer compiles
 against it unchanged).
 
+## [Unreleased]
+
+## [1.1.0] — 2026-08-01
+
+### Added
+
+- **`/livez` and `/readyz`** (`server.go`): two fixed routes wired to a
+  `staticOKHandler` that reads no state and answers 200 as soon as the listener
+  is bound. These are what container `HEALTHCHECK`s and Kubernetes probes should
+  target — never `/metrics`, which renders the whole exposition per probe tick and
+  can block behind a slow collection cycle.
+
+### Changed
+
+- **`/health` now always answers 200** (`health.go`). The readiness flag stays as
+  the *body* (`starting` before the first collection cycle completes, `ok` after)
+  and is no longer the status code. Previously it returned 503 `starting` until
+  the first cycle, which made a Docker `HEALTHCHECK` report the container
+  unhealthy for the whole start-up window and made a Kubernetes `livenessProbe`
+  restart a process that was merely still collecting. `SetReady()` and its call
+  site are unchanged.
+
+  This is behavioural, not an API break: no exported symbol changed, so consumers
+  bump with a plain `go get`. Anything asserting on a 503 from `/health` — an
+  alert rule, a smoke test, a blackbox-exporter check — must be updated.
+
 ## [1.0.0] — 2026-07-02
 
 Stable API. No code changes from `v0.1.0` — this release marks the public API as

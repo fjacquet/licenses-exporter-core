@@ -18,8 +18,8 @@ import (
 // Prometheus registry+collector, the OTLP push exporter, the /health handler, and
 // a single bound HTTP server. It is built ONCE (NewServer) and reused across every
 // reload — RunCollection swaps only the collection loop, never the store or the
-// listener, so /metrics never blanks and /health never flips back to 503 on a
-// reload (ADR-0008 §4).
+// listener, so /metrics never blanks and /health never regresses to "starting"
+// on a reload (ADR-0008 §4). /health is always 200; readiness is body content.
 type Server struct {
 	srv          *http.Server
 	ln           net.Listener
@@ -29,9 +29,15 @@ type Server struct {
 	version      string
 }
 
+// staticOKHandler is the family's trivial probe handler: 200, empty body, no
+// state read. Wired to both /livez and /readyz.
+func staticOKHandler(w http.ResponseWriter, _ *http.Request) {
+	w.WriteHeader(http.StatusOK)
+}
+
 // NewServer builds+starts the process-lifetime serving stack (shared store, Prometheus
-// registry+collector, OTLP exporter, /health, one bound listener). Bind failure is
-// returned (fatal at startup only); a runtime serve error is LOGGED, never fatal.
+// registry+collector, OTLP exporter, /health, /livez, /readyz, one bound listener). Bind
+// failure is returned (fatal at startup only); a runtime serve error is LOGGED, never fatal.
 func NewServer(base Base, version, addr string) (*Server, error) {
 	store := NewSnapshotStore(ColdStartSnapshot(version, runtime.Version()))
 
@@ -51,6 +57,12 @@ func NewServer(base Base, version, addr string) (*Server, error) {
 	mux := http.NewServeMux()
 	mux.Handle("/metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{}))
 	mux.Handle("/health", health)
+	// /livez and /readyz read no state whatsoever: they answer 200 the moment the
+	// listener is bound. Never point a probe at /metrics instead — rendering the
+	// whole exposition per probe tick is needless load and can block behind a slow
+	// collection cycle.
+	mux.HandleFunc("/livez", staticOKHandler)
+	mux.HandleFunc("/readyz", staticOKHandler)
 
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -74,7 +86,7 @@ func NewServer(base Base, version, addr string) (*Server, error) {
 		version:      version,
 	}
 	go func() {
-		logrus.WithField("addr", addr).Info("serving /metrics and /health")
+		logrus.WithField("addr", addr).Info("serving /metrics, /health, /livez and /readyz")
 		if err := srv.Serve(ln); err != nil && err != http.ErrServerClosed {
 			logrus.WithError(err).Error("http server failed")
 		}

@@ -169,9 +169,16 @@ func TestServerServesMetricsAndHealth(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GET /health: %v", err)
 	}
+	preBody, err := io.ReadAll(resp.Body)
 	_ = resp.Body.Close()
-	if resp.StatusCode != http.StatusServiceUnavailable {
-		t.Fatalf("/health before collection = %d, want %d", resp.StatusCode, http.StatusServiceUnavailable)
+	if err != nil {
+		t.Fatalf("read /health body: %v", err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("/health before collection = %d, want 200 (never 503)", resp.StatusCode)
+	}
+	if string(preBody) != "starting" {
+		t.Fatalf("/health body before collection = %q, want %q", preBody, "starting")
 	}
 
 	src := &fakeSource{vendor: "acme", instance: "i1",
@@ -188,12 +195,19 @@ func TestServerServesMetricsAndHealth(t *testing.T) {
 		if err != nil {
 			t.Fatalf("GET /health: %v", err)
 		}
+		readyBody, rerr := io.ReadAll(resp.Body)
 		_ = resp.Body.Close()
-		if resp.StatusCode == http.StatusOK {
+		if rerr != nil {
+			t.Fatalf("read /health body: %v", rerr)
+		}
+		if resp.StatusCode != http.StatusOK {
+			t.Fatalf("/health = %d, want 200 at every point in the lifecycle", resp.StatusCode)
+		}
+		if string(readyBody) == "ok" {
 			break
 		}
 		if time.Now().After(deadline) {
-			t.Fatalf("/health never became ready, last status = %d", resp.StatusCode)
+			t.Fatalf("/health never reported ready, last body = %q", readyBody)
 		}
 		time.Sleep(5 * time.Millisecond)
 	}
@@ -209,5 +223,40 @@ func TestServerServesMetricsAndHealth(t *testing.T) {
 	}
 	if !strings.Contains(string(body), "license_build_info") {
 		t.Fatalf("/metrics body missing license_build_info, got:\n%s", body)
+	}
+}
+
+// TestServerServesProbesBeforeAnyCollection proves /livez, /readyz and /health
+// all answer 200 on a server that has never run a collection cycle — the
+// always-200 contract a Kubernetes livenessProbe / Docker HEALTHCHECK depends
+// on. RunCollection is deliberately never called here.
+func TestServerServesProbesBeforeAnyCollection(t *testing.T) {
+	srv, err := NewServer(Base{}, "v", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("NewServer: %v", err)
+	}
+	defer func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		defer cancel()
+		_ = srv.Shutdown(ctx)
+	}()
+
+	base := "http://" + srv.ln.Addr().String()
+	for _, path := range []string{"/livez", "/readyz", "/health"} {
+		resp, err := http.Get(base + path)
+		if err != nil {
+			t.Fatalf("GET %s: %v", path, err)
+		}
+		body, rerr := io.ReadAll(resp.Body)
+		_ = resp.Body.Close()
+		if rerr != nil {
+			t.Fatalf("read %s body: %v", path, rerr)
+		}
+		if resp.StatusCode != http.StatusOK {
+			t.Fatalf("%s before any collection = %d, want 200", path, resp.StatusCode)
+		}
+		if path == "/health" && string(body) != "starting" {
+			t.Fatalf("/health body before any collection = %q, want %q", body, "starting")
+		}
 	}
 }

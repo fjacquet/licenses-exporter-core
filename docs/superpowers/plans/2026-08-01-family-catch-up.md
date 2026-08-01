@@ -178,7 +178,7 @@ All Phase 1 work happens in `/Users/fjacquet/Projects/licenses-exporter-core`.
   `TestServerServesMetricsAndHealth`. Referencing `staticOKHandler` (not yet
   defined) makes the package fail to compile — that is the intended red state.
 
-- [ ] **Step 1: Replace the whole body of `health_test.go`.** Write this file
+- [x] **Step 1: Replace the whole body of `health_test.go`.** Write this file
   exactly:
 
 ```go
@@ -229,7 +229,7 @@ func TestStaticOKHandler(t *testing.T) {
 }
 ```
 
-- [ ] **Step 2: In `run_test.go`, replace the pre-collection 503 assertion inside
+- [x] **Step 2: In `run_test.go`, replace the pre-collection 503 assertion inside
   `TestServerServesMetricsAndHealth`.** Find this block (currently lines 168–175):
 
 ```go
@@ -263,7 +263,7 @@ func TestStaticOKHandler(t *testing.T) {
 	}
 ```
 
-- [ ] **Step 3: In `run_test.go`, rewrite the readiness poll loop of the same test
+- [x] **Step 3: In `run_test.go`, rewrite the readiness poll loop of the same test
   to poll the BODY, not the status.** Find this block (currently lines 185–199):
 
 ```go
@@ -311,7 +311,7 @@ func TestStaticOKHandler(t *testing.T) {
 	}
 ```
 
-- [ ] **Step 4: Append a new server-level probes test to the end of
+- [x] **Step 4: Append a new server-level probes test to the end of
   `run_test.go`.** Add:
 
 ```go
@@ -351,7 +351,7 @@ func TestServerServesProbesBeforeAnyCollection(t *testing.T) {
 }
 ```
 
-- [ ] **Step 5: Run the tests and confirm they fail for the right reason.**
+- [x] **Step 5: Run the tests and confirm they fail for the right reason.**
 
 ```bash
 cd /Users/fjacquet/Projects/licenses-exporter-core && go test ./... 2>&1 | head -30
@@ -361,7 +361,7 @@ cd /Users/fjacquet/Projects/licenses-exporter-core && go test ./... 2>&1 | head 
   red state. If instead you see a passing run, the edits did not land — re-check
   Steps 1–4 before continuing.
 
-- [ ] **Step 6: Commit the red tests.**
+- [x] **Step 6: Commit the red tests.**
 
 ```bash
 cd /Users/fjacquet/Projects/licenses-exporter-core && git add health_test.go run_test.go && git commit -m "test: /health always 200 and /livez /readyz probes (red)
@@ -385,7 +385,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
   writes a non-200 status. **No exported API changes** — this is why the release
   is a minor, not a major.
 
-- [ ] **Step 1: Replace the whole body of `health.go`.** Write this file exactly:
+- [x] **Step 1: Replace the whole body of `health.go`.** Write this file exactly:
 
 ```go
 package licenses_core
@@ -418,7 +418,7 @@ func (h *Health) ServeHTTP(w http.ResponseWriter, _ *http.Request) {
 }
 ```
 
-- [ ] **Step 2: In `server.go`, register the two probe routes.** Find these lines
+- [x] **Step 2: In `server.go`, register the two probe routes.** Find these lines
   (currently 50–53):
 
 ```go
@@ -443,7 +443,7 @@ func (h *Health) ServeHTTP(w http.ResponseWriter, _ *http.Request) {
 	mux.HandleFunc("/readyz", staticOKHandler)
 ```
 
-- [ ] **Step 3: In `server.go`, add the handler itself.** Insert this function
+- [x] **Step 3: In `server.go`, add the handler itself.** Insert this function
   immediately **above** `func NewServer(` (i.e. after the `Server` struct
   declaration, currently ending at line 30):
 
@@ -455,7 +455,7 @@ func staticOKHandler(w http.ResponseWriter, _ *http.Request) {
 }
 ```
 
-- [ ] **Step 4: In `server.go`, update the two stale comments that still promise a
+- [x] **Step 4: In `server.go`, update the two stale comments that still promise a
   503.** In the `Server` struct doc comment, replace:
 
 ```go
@@ -490,7 +490,7 @@ func staticOKHandler(w http.ResponseWriter, _ *http.Request) {
   `(shared store, Prometheus registry+collector, OTLP exporter, /health, one bound listener)`
   to `(shared store, Prometheus registry+collector, OTLP exporter, /health, /livez, /readyz, one bound listener)`.
 
-- [ ] **Step 5: Run the tests and confirm green.**
+- [x] **Step 5: Run the tests and confirm green.**
 
 ```bash
 cd /Users/fjacquet/Projects/licenses-exporter-core && go test ./... 2>&1 | tail -20
@@ -500,7 +500,7 @@ cd /Users/fjacquet/Projects/licenses-exporter-core && go test ./... 2>&1 | tail 
   `TestServerServesMetricsAndHealth` still fails, the Task 1 Step 2/3 edits were
   not applied.
 
-- [ ] **Step 6: Run the full gate.**
+- [x] **Step 6: Run the full gate.**
 
 ```bash
 cd /Users/fjacquet/Projects/licenses-exporter-core && make ci
@@ -508,7 +508,7 @@ cd /Users/fjacquet/Projects/licenses-exporter-core && make ci
 
   `lint`, `test` (race + coverage), `build`, `vuln` must all pass.
 
-- [ ] **Step 7: Commit.**
+- [x] **Step 7: Commit.**
 
 ```bash
 cd /Users/fjacquet/Projects/licenses-exporter-core && git add health.go server.go && git commit -m "feat: always-200 /health plus /livez and /readyz probes
@@ -531,7 +531,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 - Consumes: nothing.
 - Produces: consumer-facing documentation of the four HTTP routes.
 
-- [ ] **Step 1: Update the lifecycle sentence.** Find line 52, currently:
+- [x] **Step 1: Update the lifecycle sentence.** Find line 52, currently:
 
 ```
 runs the whole lifecycle (`--once`, or serve `/metrics` + `/health` with
@@ -544,7 +544,7 @@ runs the whole lifecycle (`--once`, or serve `/metrics` + `/health` with
 runs the whole lifecycle (`--once`, or serve `/metrics`, `/health`, `/livez` + `/readyz` with
 ```
 
-- [ ] **Step 2: Add a routes section.** Immediately after the paragraph containing
+- [x] **Step 2: Add a routes section.** Immediately after the paragraph containing
   line 84 (`collection loop on reload — /metrics never blanks and the socket never rebinds.`),
   insert a blank line and then:
 
@@ -563,7 +563,7 @@ never at `/metrics`: rendering the full exposition per probe tick is needless
 load and can block behind a slow collection cycle.
 ```
 
-- [ ] **Step 3: Verify the file still reads correctly.**
+- [x] **Step 3: Verify the file still reads correctly.**
 
 ```bash
 cd /Users/fjacquet/Projects/licenses-exporter-core && grep -n "livez\|readyz\|always 200" README.md
@@ -571,7 +571,7 @@ cd /Users/fjacquet/Projects/licenses-exporter-core && grep -n "livez\|readyz\|al
 
   Expect at least five hits.
 
-- [ ] **Step 4: Commit.**
+- [x] **Step 4: Commit.**
 
 ```bash
 cd /Users/fjacquet/Projects/licenses-exporter-core && git add README.md && git commit -m "docs: document /metrics /health /livez /readyz in the README
@@ -592,7 +592,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
   today — its first heading is `## [1.0.0] — 2026-07-02` at line 9) and the
   `## [1.1.0]` entry.
 
-- [ ] **Step 1: Insert the two new sections above `## [1.0.0]`.** The file
+- [x] **Step 1: Insert the two new sections above `## [1.0.0]`.** The file
   currently goes straight from the intro paragraph (ending line 7) to
   `## [1.0.0] — 2026-07-02` on line 9. Insert this block between them, so
   `## [Unreleased]` sits directly under the intro and `## [1.1.0]` directly above
@@ -626,7 +626,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
   alert rule, a smoke test, a blackbox-exporter check — must be updated.
 ```
 
-- [ ] **Step 2: Verify the heading order.**
+- [x] **Step 2: Verify the heading order.**
 
 ```bash
 cd /Users/fjacquet/Projects/licenses-exporter-core && grep -n "^## " CHANGELOG.md
@@ -635,7 +635,7 @@ cd /Users/fjacquet/Projects/licenses-exporter-core && grep -n "^## " CHANGELOG.m
   Expect exactly, in order: `## [Unreleased]`, `## [1.1.0] — 2026-08-01`,
   `## [1.0.0] — 2026-07-02`, `## [0.1.0] — 2026-07-02`.
 
-- [ ] **Step 3: Commit.**
+- [x] **Step 3: Commit.**
 
 ```bash
 cd /Users/fjacquet/Projects/licenses-exporter-core && git add CHANGELOG.md && git commit -m "docs(changelog): add [Unreleased] heading and the v1.1.0 entry
@@ -655,7 +655,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
   `go get github.com/fjacquet/licenses-exporter-core@v1.1.0`. **Every remaining
   task in this plan blocks on this step.**
 
-- [ ] **Step 1: Confirm a clean tree and a green gate.**
+- [x] **Step 1: Confirm a clean tree and a green gate.**
 
 ```bash
 cd /Users/fjacquet/Projects/licenses-exporter-core && git status --porcelain && make ci
@@ -663,7 +663,7 @@ cd /Users/fjacquet/Projects/licenses-exporter-core && git status --porcelain && 
 
   `git status --porcelain` must print nothing.
 
-- [ ] **Step 2: Confirm the last released tag, so the new one is genuinely next.**
+- [x] **Step 2: Confirm the last released tag, so the new one is genuinely next.**
 
 ```bash
 cd /Users/fjacquet/Projects/licenses-exporter-core && git tag --sort=-v:refname | head -5
@@ -672,13 +672,13 @@ cd /Users/fjacquet/Projects/licenses-exporter-core && git tag --sort=-v:refname 
   Expect `v1.0.1`, `v1.0.0`, `v0.1.0`. If a `v1.1.0` already exists, stop and
   reassess — do not force-move a published tag.
 
-- [ ] **Step 3: Push the branch.**
+- [x] **Step 3: Push the branch.**
 
 ```bash
 cd /Users/fjacquet/Projects/licenses-exporter-core && git push origin HEAD
 ```
 
-- [ ] **Step 4: Tag and push the tag.**
+- [x] **Step 4: Tag and push the tag.**
 
 ```bash
 cd /Users/fjacquet/Projects/licenses-exporter-core && \
@@ -686,7 +686,7 @@ cd /Users/fjacquet/Projects/licenses-exporter-core && \
   git push origin v1.1.0
 ```
 
-- [ ] **Step 5: Prove the tag is resolvable by the module proxy before any
+- [x] **Step 5: Prove the tag is resolvable by the module proxy before any
   consumer tries to bump.**
 
 ```bash
@@ -717,7 +717,7 @@ Port **9105**. All work in `/Users/fjacquet/Projects/m365_licenses_exporter`.
   and whose `/health` is always 200. **No repo code changes** — `main.go`
   delegates to `core.Main` and registers no routes of its own.
 
-- [ ] **Step 1: Confirm the current pin is `v1.0.1`.**
+- [x] **Step 1: Confirm the current pin is `v1.0.1`.**
 
 ```bash
 cd /Users/fjacquet/Projects/m365_licenses_exporter && grep -n "licenses-exporter-core" go.mod
@@ -725,14 +725,14 @@ cd /Users/fjacquet/Projects/m365_licenses_exporter && grep -n "licenses-exporter
 
   Expect `github.com/fjacquet/licenses-exporter-core v1.0.1`.
 
-- [ ] **Step 2: Bump and tidy.**
+- [x] **Step 2: Bump and tidy.**
 
 ```bash
 cd /Users/fjacquet/Projects/m365_licenses_exporter && \
   go get github.com/fjacquet/licenses-exporter-core@v1.1.0 && go mod tidy
 ```
 
-- [ ] **Step 3: Confirm the new pin.**
+- [x] **Step 3: Confirm the new pin.**
 
 ```bash
 cd /Users/fjacquet/Projects/m365_licenses_exporter && grep -n "licenses-exporter-core" go.mod
@@ -740,7 +740,7 @@ cd /Users/fjacquet/Projects/m365_licenses_exporter && grep -n "licenses-exporter
 
   Expect `github.com/fjacquet/licenses-exporter-core v1.1.0`.
 
-- [ ] **Step 4: Prove the probes are actually served, by running the binary.**
+- [x] **Step 4: Prove the probes are actually served, by running the binary.**
 
 ```bash
 cd /Users/fjacquet/Projects/m365_licenses_exporter && go build -o /tmp/m365_probe_check . && \
@@ -756,13 +756,13 @@ cd /Users/fjacquet/Projects/m365_licenses_exporter && go build -o /tmp/m365_prob
   (`export M365_TENANT_ID=t M365_CLIENT_ID=c M365_CLIENT_SECRET=s`) and retry —
   the probes are the point here, not a successful Graph call.
 
-- [ ] **Step 5: Run the gate.**
+- [x] **Step 5: Run the gate.**
 
 ```bash
 cd /Users/fjacquet/Projects/m365_licenses_exporter && make ci
 ```
 
-- [ ] **Step 6: Commit.**
+- [x] **Step 6: Commit.**
 
 ```bash
 cd /Users/fjacquet/Projects/m365_licenses_exporter && git add go.mod go.sum && git commit -m "feat: bump licenses-exporter-core to v1.1.0 for /livez /readyz
@@ -791,7 +791,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
   (**breaking**: was distroless `nonroot`, uid `65532`) with a working
   `HEALTHCHECK`; the same `HEALTHCHECK` in the local build image.
 
-- [ ] **Step 1: Replace the whole of `Dockerfile.goreleaser`.** Write exactly:
+- [x] **Step 1: Replace the whole of `Dockerfile.goreleaser`.** Write exactly:
 
 ```dockerfile
 # Release image: copies the prebuilt GoReleaser binary (buildx lays it out per-platform
@@ -825,7 +825,7 @@ ENTRYPOINT ["/usr/local/bin/m365_licenses_exporter"]
 CMD ["--config", "/etc/m365_licenses_exporter/config.yaml"]
 ```
 
-- [ ] **Step 2: Add the `HEALTHCHECK` to the local `Dockerfile`.** It currently has
+- [x] **Step 2: Add the `HEALTHCHECK` to the local `Dockerfile`.** It currently has
   `EXPOSE 9105` on line 32 and `USER licenses` on line 34. Replace:
 
 ```dockerfile
@@ -848,7 +848,7 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
 USER licenses
 ```
 
-- [ ] **Step 3: Run hadolint on both files and read, do not act on, the expected
+- [x] **Step 3: Run hadolint on both files and read, do not act on, the expected
   findings.**
 
 ```bash
@@ -859,7 +859,7 @@ cd /Users/fjacquet/Projects/m365_licenses_exporter && \
   `DL3025`, `DL3007` and `DL3066` are expected. Add no suppressions. Any *other*
   rule firing is a real finding — fix it.
 
-- [ ] **Step 4: Build the local image and assert it reports `healthy`.**
+- [x] **Step 4: Build the local image and assert it reports `healthy`.**
 
 ```bash
 cd /Users/fjacquet/Projects/m365_licenses_exporter && \
@@ -876,7 +876,7 @@ cd /Users/fjacquet/Projects/m365_licenses_exporter && \
   `docker inspect --format='{{json .State.Health.Log}}' m365_hc_test` before
   changing anything — the usual causes are a `localhost` typo or a wrong port.
 
-- [ ] **Step 5: Confirm the container runs as uid 10001, not 65532.**
+- [x] **Step 5: Confirm the container runs as uid 10001, not 65532.**
 
 ```bash
 docker exec m365_hc_test id
@@ -884,13 +884,13 @@ docker exec m365_hc_test id
 
   Expect `uid=10001(licenses) gid=10001(licenses)`.
 
-- [ ] **Step 6: Tear down.**
+- [x] **Step 6: Tear down.**
 
 ```bash
 docker rm -f m365_hc_test && docker rmi m365_licenses_exporter:hc-test
 ```
 
-- [ ] **Step 7: Build the release image the way GoReleaser will, and assert
+- [x] **Step 7: Build the release image the way GoReleaser will, and assert
   `healthy`.** On Apple Silicon the binary must be arm64 and `TARGETPLATFORM`
   must match, or the container dies with `exec format error`:
 
@@ -913,13 +913,13 @@ cd /Users/fjacquet/Projects/m365_licenses_exporter && \
   **Must print `healthy`.** On an amd64 host substitute `amd64` for `arm64`
   throughout.
 
-- [ ] **Step 8: Tear down and clean up.**
+- [x] **Step 8: Tear down and clean up.**
 
 ```bash
 docker rm -f m365_gr_hc_test && docker rmi m365_licenses_exporter:gr-hc-test && rm -rf /tmp/m365_grctx
 ```
 
-- [ ] **Step 9: Commit.**
+- [x] **Step 9: Commit.**
 
 ```bash
 cd /Users/fjacquet/Projects/m365_licenses_exporter && git add Dockerfile Dockerfile.goreleaser && git commit -m "feat(docker)!: Alpine release image at uid 10001, HEALTHCHECK on /livez
@@ -947,7 +947,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
   identical to the Dockerfile's (`interval: 30s`, `timeout: 5s`, `retries: 3`,
   `start_period: 10s`).
 
-- [ ] **Step 1: Add the healthcheck to `docker-compose.yml`.** In the
+- [x] **Step 1: Add the healthcheck to `docker-compose.yml`.** In the
   `m365_licenses_exporter` service, replace:
 
 ```yaml
@@ -975,7 +975,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
   prometheus:
 ```
 
-- [ ] **Step 2: Add the same healthcheck to `docker-compose.ghcr.yml`.** In the
+- [x] **Step 2: Add the same healthcheck to `docker-compose.ghcr.yml`.** In the
   `m365_licenses_exporter` service, replace:
 
 ```yaml
@@ -1005,7 +1005,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
   prometheus:
 ```
 
-- [ ] **Step 3: Validate both files.**
+- [x] **Step 3: Validate both files.**
 
 ```bash
 cd /Users/fjacquet/Projects/m365_licenses_exporter && \
@@ -1013,7 +1013,7 @@ cd /Users/fjacquet/Projects/m365_licenses_exporter && \
   docker compose -f docker-compose.ghcr.yml config -q && echo "both valid"
 ```
 
-- [ ] **Step 4: Confirm the 5s timeout appears in every one of the four places.**
+- [x] **Step 4: Confirm the 5s timeout appears in every one of the four places.**
 
 ```bash
 cd /Users/fjacquet/Projects/m365_licenses_exporter && \
@@ -1022,7 +1022,7 @@ cd /Users/fjacquet/Projects/m365_licenses_exporter && \
 
   Expect exactly four hits, one per file.
 
-- [ ] **Step 5: Bring the local stack up and assert the exporter is `healthy`.**
+- [x] **Step 5: Bring the local stack up and assert the exporter is `healthy`.**
   (Do **not** do this for the ghcr stack — it pulls the still-distroless
   published image; see Global Constraint 9.)
 
@@ -1034,13 +1034,13 @@ cd /Users/fjacquet/Projects/m365_licenses_exporter && \
 
   **Must print `healthy`.**
 
-- [ ] **Step 6: Tear down.**
+- [x] **Step 6: Tear down.**
 
 ```bash
 cd /Users/fjacquet/Projects/m365_licenses_exporter && docker compose down
 ```
 
-- [ ] **Step 7: Commit.**
+- [x] **Step 7: Commit.**
 
 ```bash
 cd /Users/fjacquet/Projects/m365_licenses_exporter && git add docker-compose.yml docker-compose.ghcr.yml && git commit -m "feat(compose): healthcheck the exporter against /livez on 9105
@@ -1067,7 +1067,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
   `## [Unreleased]` CHANGELOG section (**this repo has none — create it**), and
   user-facing docs that no longer claim 503-on-startup or a distroless image.
 
-- [ ] **Step 1: Confirm the next ADR number. Never assume.**
+- [x] **Step 1: Confirm the next ADR number. Never assume.**
 
 ```bash
 ls /Users/fjacquet/Projects/m365_licenses_exporter/docs/adr/
@@ -1076,7 +1076,7 @@ ls /Users/fjacquet/Projects/m365_licenses_exporter/docs/adr/
   Expect `0001`…`0010` plus `index.md`, making **`0011`** next. If the highest is
   different, use *that* number + 1 in every filename and reference below.
 
-- [ ] **Step 2: Create the ADR** at
+- [x] **Step 2: Create the ADR** at
   `docs/adr/0011-livez-readyz-probes-and-alpine-release-image.md`:
 
 ```markdown
@@ -1143,7 +1143,7 @@ needless load and can block behind a slow collection cycle.
 - Engine behaviour arrives by a core version bump, not a local edit (ADR-0010).
 ```
 
-- [ ] **Step 3: Add the index row.** In `docs/adr/index.md`, after the `0010` row
+- [x] **Step 3: Add the index row.** In `docs/adr/index.md`, after the `0010` row
   (line 21), insert:
 
 ```markdown
@@ -1164,14 +1164,14 @@ To add a decision, copy [`0011`](0011-livez-readyz-probes-and-alpine-release-ima
 structure to the next number and link it here.
 ```
 
-- [ ] **Step 4: Add the mkdocs nav entry.** In `mkdocs.yml`, after the `0010` line
+- [x] **Step 4: Add the mkdocs nav entry.** In `mkdocs.yml`, after the `0010` line
   (line 62), insert:
 
 ```yaml
       - 0011 /livez + /readyz probes, Alpine release image: adr/0011-livez-readyz-probes-and-alpine-release-image.md
 ```
 
-- [ ] **Step 5: Create the CHANGELOG `## [Unreleased]` section.** This file has
+- [x] **Step 5: Create the CHANGELOG `## [Unreleased]` section.** This file has
   **no** `## [Unreleased]` heading — its first heading is `## [1.1.2] — 2026-07-10`
   on line 7. Insert this block between the intro paragraph (ending line 5) and
   that heading:
@@ -1203,7 +1203,7 @@ structure to the next number and link it here.
   a 503 from `/health` must be updated.
 ```
 
-- [ ] **Step 6: Update `docs/deployment/docker.md`.** Replace lines 25–26:
+- [x] **Step 6: Update `docs/deployment/docker.md`.** Replace lines 25–26:
 
 ```markdown
 `/metrics` and `/health` are both served on `9105`; `/health` returns HTTP 200 with
@@ -1250,7 +1250,7 @@ which copies the prebuilt binary. Published images before the ADR-0011 release
 were `gcr.io/distroless/static:nonroot` at uid `65532`.
 ```
 
-- [ ] **Step 7: Update `README.md`.** Replace line 40:
+- [x] **Step 7: Update `README.md`.** Replace line 40:
 
 ```markdown
 # metrics: http://localhost:9105/metrics   health: http://localhost:9105/health
@@ -1263,7 +1263,7 @@ were `gcr.io/distroless/static:nonroot` at uid `65532`.
 # probes:  http://localhost:9105/livez     http://localhost:9105/readyz  (always 200)
 ```
 
-- [ ] **Step 8: Sweep for falsified claims.**
+- [x] **Step 8: Sweep for falsified claims.**
 
 ```bash
 cd /Users/fjacquet/Projects/m365_licenses_exporter && \
@@ -1277,7 +1277,7 @@ cd /Users/fjacquet/Projects/m365_licenses_exporter && \
   sentence added in Step 6 — all of which describe the *past* state explicitly.
   Any other hit is a stale user-facing claim: fix it.
 
-- [ ] **Step 9: Build the docs site strictly.**
+- [x] **Step 9: Build the docs site strictly.**
 
 ```bash
 cd /Users/fjacquet/Projects/m365_licenses_exporter && \
@@ -1286,13 +1286,13 @@ cd /Users/fjacquet/Projects/m365_licenses_exporter && \
 
   Must exit 0. A missing nav entry or a broken ADR link fails here.
 
-- [ ] **Step 10: Run the gate one more time.**
+- [x] **Step 10: Run the gate one more time.**
 
 ```bash
 cd /Users/fjacquet/Projects/m365_licenses_exporter && make ci
 ```
 
-- [ ] **Step 11: Commit.**
+- [x] **Step 11: Commit.**
 
 ```bash
 cd /Users/fjacquet/Projects/m365_licenses_exporter && \
@@ -1320,20 +1320,20 @@ Port **9106**. All work in `/Users/fjacquet/Projects/vmware_licenses_exporter`.
 - Produces: an exporter serving `/livez` and `/readyz` with an always-200
   `/health`. **No repo code changes** — `main.go` delegates to `core.Main`.
 
-- [ ] **Step 1: Confirm the current pin is `v1.0.1`.**
+- [x] **Step 1: Confirm the current pin is `v1.0.1`.**
 
 ```bash
 cd /Users/fjacquet/Projects/vmware_licenses_exporter && grep -n "licenses-exporter-core" go.mod
 ```
 
-- [ ] **Step 2: Bump and tidy.**
+- [x] **Step 2: Bump and tidy.**
 
 ```bash
 cd /Users/fjacquet/Projects/vmware_licenses_exporter && \
   go get github.com/fjacquet/licenses-exporter-core@v1.1.0 && go mod tidy
 ```
 
-- [ ] **Step 3: Confirm the new pin.**
+- [x] **Step 3: Confirm the new pin.**
 
 ```bash
 cd /Users/fjacquet/Projects/vmware_licenses_exporter && grep -n "licenses-exporter-core" go.mod
@@ -1341,7 +1341,7 @@ cd /Users/fjacquet/Projects/vmware_licenses_exporter && grep -n "licenses-export
 
   Expect `github.com/fjacquet/licenses-exporter-core v1.1.0`.
 
-- [ ] **Step 4: Prove the probes are actually served, by running the binary.**
+- [x] **Step 4: Prove the probes are actually served, by running the binary.**
 
 ```bash
 cd /Users/fjacquet/Projects/vmware_licenses_exporter && go build -o /tmp/vmware_probe_check . && \
@@ -1355,13 +1355,13 @@ cd /Users/fjacquet/Projects/vmware_licenses_exporter && go build -o /tmp/vmware_
   Expect `/livez -> 200`, `/readyz -> 200`, `/health -> 200 starting`. The vCenter
   itself being unreachable is fine — the probes are the point.
 
-- [ ] **Step 5: Run the gate.**
+- [x] **Step 5: Run the gate.**
 
 ```bash
 cd /Users/fjacquet/Projects/vmware_licenses_exporter && make ci
 ```
 
-- [ ] **Step 6: Commit.**
+- [x] **Step 6: Commit.**
 
 ```bash
 cd /Users/fjacquet/Projects/vmware_licenses_exporter && git add go.mod go.sum && git commit -m "feat: bump licenses-exporter-core to v1.1.0 for /livez /readyz
@@ -1389,7 +1389,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
   (**breaking**: was distroless `nonroot`, uid `65532`) with a working
   `HEALTHCHECK`; the same `HEALTHCHECK` in the local build image.
 
-- [ ] **Step 1: Replace the whole of `Dockerfile.goreleaser`.** Write exactly:
+- [x] **Step 1: Replace the whole of `Dockerfile.goreleaser`.** Write exactly:
 
 ```dockerfile
 # Release image: copies the prebuilt GoReleaser binary (buildx lays it out per-platform
@@ -1423,7 +1423,7 @@ ENTRYPOINT ["/usr/local/bin/vmware_licenses_exporter"]
 CMD ["--config", "/etc/vmware_licenses_exporter/config.yaml"]
 ```
 
-- [ ] **Step 2: Add the `HEALTHCHECK` to the local `Dockerfile`.** It currently has
+- [x] **Step 2: Add the `HEALTHCHECK` to the local `Dockerfile`.** It currently has
   `EXPOSE 9106` on line 32 and `USER licenses` on line 34. Replace:
 
 ```dockerfile
@@ -1446,7 +1446,7 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
 USER licenses
 ```
 
-- [ ] **Step 3: Run hadolint on both files.**
+- [x] **Step 3: Run hadolint on both files.**
 
 ```bash
 cd /Users/fjacquet/Projects/vmware_licenses_exporter && \
@@ -1456,7 +1456,7 @@ cd /Users/fjacquet/Projects/vmware_licenses_exporter && \
   `DL3025`, `DL3007`, `DL3066` are expected. Add no suppressions. Any other rule
   firing is a real finding — fix it.
 
-- [ ] **Step 4: Build the local image and assert it reports `healthy`.**
+- [x] **Step 4: Build the local image and assert it reports `healthy`.**
 
 ```bash
 cd /Users/fjacquet/Projects/vmware_licenses_exporter && \
@@ -1472,7 +1472,7 @@ cd /Users/fjacquet/Projects/vmware_licenses_exporter && \
   `docker inspect --format='{{json .State.Health.Log}}' vmware_hc_test` before
   changing anything.
 
-- [ ] **Step 5: Confirm the container runs as uid 10001.**
+- [x] **Step 5: Confirm the container runs as uid 10001.**
 
 ```bash
 docker exec vmware_hc_test id
@@ -1480,13 +1480,13 @@ docker exec vmware_hc_test id
 
   Expect `uid=10001(licenses) gid=10001(licenses)`.
 
-- [ ] **Step 6: Tear down.**
+- [x] **Step 6: Tear down.**
 
 ```bash
 docker rm -f vmware_hc_test && docker rmi vmware_licenses_exporter:hc-test
 ```
 
-- [ ] **Step 7: Build the release image the way GoReleaser will, and assert
+- [x] **Step 7: Build the release image the way GoReleaser will, and assert
   `healthy`.**
 
 ```bash
@@ -1508,13 +1508,13 @@ cd /Users/fjacquet/Projects/vmware_licenses_exporter && \
   **Must print `healthy`.** On an amd64 host substitute `amd64` for `arm64`
   throughout; a mismatch produces `exec format error`, not a probe failure.
 
-- [ ] **Step 8: Tear down and clean up.**
+- [x] **Step 8: Tear down and clean up.**
 
 ```bash
 docker rm -f vmware_gr_hc_test && docker rmi vmware_licenses_exporter:gr-hc-test && rm -rf /tmp/vmware_grctx
 ```
 
-- [ ] **Step 9: Commit.**
+- [x] **Step 9: Commit.**
 
 ```bash
 cd /Users/fjacquet/Projects/vmware_licenses_exporter && git add Dockerfile Dockerfile.goreleaser && git commit -m "feat(docker)!: Alpine release image at uid 10001, HEALTHCHECK on /livez
@@ -1541,7 +1541,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 - Produces: a `healthcheck:` on the exporter service in both files, with values
   identical to the Dockerfile's.
 
-- [ ] **Step 1: Add the healthcheck to `docker-compose.yml`.** In the
+- [x] **Step 1: Add the healthcheck to `docker-compose.yml`.** In the
   `vmware_licenses_exporter` service, replace:
 
 ```yaml
@@ -1569,7 +1569,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
   prometheus:
 ```
 
-- [ ] **Step 2: Add the same healthcheck to `docker-compose.ghcr.yml`.** In the
+- [x] **Step 2: Add the same healthcheck to `docker-compose.ghcr.yml`.** In the
   `vmware_licenses_exporter` service, replace:
 
 ```yaml
@@ -1599,7 +1599,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
   prometheus:
 ```
 
-- [ ] **Step 3: Validate both files.**
+- [x] **Step 3: Validate both files.**
 
 ```bash
 cd /Users/fjacquet/Projects/vmware_licenses_exporter && \
@@ -1607,7 +1607,7 @@ cd /Users/fjacquet/Projects/vmware_licenses_exporter && \
   docker compose -f docker-compose.ghcr.yml config -q && echo "both valid"
 ```
 
-- [ ] **Step 4: Confirm the 5s timeout appears in every one of the four places.**
+- [x] **Step 4: Confirm the 5s timeout appears in every one of the four places.**
 
 ```bash
 cd /Users/fjacquet/Projects/vmware_licenses_exporter && \
@@ -1616,7 +1616,7 @@ cd /Users/fjacquet/Projects/vmware_licenses_exporter && \
 
   Expect exactly four hits, one per file.
 
-- [ ] **Step 5: Bring the local stack up and assert the exporter is `healthy`.**
+- [x] **Step 5: Bring the local stack up and assert the exporter is `healthy`.**
   Not the ghcr stack — see Global Constraint 9.
 
 ```bash
@@ -1627,13 +1627,13 @@ cd /Users/fjacquet/Projects/vmware_licenses_exporter && \
 
   **Must print `healthy`.**
 
-- [ ] **Step 6: Tear down.**
+- [x] **Step 6: Tear down.**
 
 ```bash
 cd /Users/fjacquet/Projects/vmware_licenses_exporter && docker compose down
 ```
 
-- [ ] **Step 7: Commit.**
+- [x] **Step 7: Commit.**
 
 ```bash
 cd /Users/fjacquet/Projects/vmware_licenses_exporter && git add docker-compose.yml docker-compose.ghcr.yml && git commit -m "feat(compose): healthcheck the exporter against /livez on 9106
@@ -1660,7 +1660,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
   entries under the **existing** `## [Unreleased]` heading (line 7), and docs that
   no longer claim 503-on-startup or a distroless image.
 
-- [ ] **Step 1: Confirm the next ADR number. Never assume.**
+- [x] **Step 1: Confirm the next ADR number. Never assume.**
 
 ```bash
 ls /Users/fjacquet/Projects/vmware_licenses_exporter/docs/adr/
@@ -1669,7 +1669,7 @@ ls /Users/fjacquet/Projects/vmware_licenses_exporter/docs/adr/
   Expect `0001-consume-core-retain-govmomi.md` and `index.md`, making **`0002`**
   next. If the highest is different, use *that* number + 1 throughout.
 
-- [ ] **Step 2: Create the ADR** at
+- [x] **Step 2: Create the ADR** at
   `docs/adr/0002-livez-readyz-probes-and-alpine-release-image.md`:
 
 ```markdown
@@ -1736,7 +1736,7 @@ needless load and can block behind a slow collection cycle.
 - Engine behaviour arrives by a core version bump, not a local edit (ADR-0001).
 ```
 
-- [ ] **Step 3: Add the index row.** In `docs/adr/index.md`, after the `0001` row
+- [x] **Step 3: Add the index row.** In `docs/adr/index.md`, after the `0001` row
   (line 10), insert:
 
 ```markdown
@@ -1757,14 +1757,14 @@ To add a decision, copy [`0002`](0002-livez-readyz-probes-and-alpine-release-ima
 structure to the next number and link it here.
 ```
 
-- [ ] **Step 4: Add the mkdocs nav entry.** In `mkdocs.yml`, after the `0001` line
+- [x] **Step 4: Add the mkdocs nav entry.** In `mkdocs.yml`, after the `0001` line
   in the `Architecture Decisions:` block, insert:
 
 ```yaml
       - 0002 /livez + /readyz probes, Alpine release image: adr/0002-livez-readyz-probes-and-alpine-release-image.md
 ```
 
-- [ ] **Step 5: Fill in the existing `## [Unreleased]` CHANGELOG section.** This
+- [x] **Step 5: Fill in the existing `## [Unreleased]` CHANGELOG section.** This
   file already has `## [Unreleased]` on line 7, immediately followed by
   `## [1.0.2] - 2026-07-10` on line 9. Insert this content between them:
 
@@ -1793,7 +1793,7 @@ structure to the next number and link it here.
   a 503 from `/health` must be updated.
 ```
 
-- [ ] **Step 6: Update `docs/deployment/docker.md`.** Replace lines 25–26:
+- [x] **Step 6: Update `docs/deployment/docker.md`.** Replace lines 25–26:
 
 ```markdown
 `/metrics` and `/health` are both served on `9106`; `/health` returns HTTP 200 with
@@ -1833,7 +1833,7 @@ GHCR, which copies the prebuilt binary. Published images before the ADR-0002
 release were `gcr.io/distroless/static:nonroot` at uid `65532`.
 ```
 
-- [ ] **Step 7: Update `README.md`.** Replace line 41:
+- [x] **Step 7: Update `README.md`.** Replace line 41:
 
 ```markdown
 # metrics: http://localhost:9106/metrics   health: http://localhost:9106/health
@@ -1846,7 +1846,7 @@ release were `gcr.io/distroless/static:nonroot` at uid `65532`.
 # probes:  http://localhost:9106/livez     http://localhost:9106/readyz  (always 200)
 ```
 
-- [ ] **Step 8: Sweep for falsified claims.**
+- [x] **Step 8: Sweep for falsified claims.**
 
 ```bash
 cd /Users/fjacquet/Projects/vmware_licenses_exporter && \
@@ -1859,7 +1859,7 @@ cd /Users/fjacquet/Projects/vmware_licenses_exporter && \
   the `docs/deployment/docker.md` sentence added in Step 6 — all of which describe
   the *past* state explicitly. Any other hit is a stale user-facing claim: fix it.
 
-- [ ] **Step 9: Build the docs site strictly.**
+- [x] **Step 9: Build the docs site strictly.**
 
 ```bash
 cd /Users/fjacquet/Projects/vmware_licenses_exporter && \
@@ -1868,13 +1868,13 @@ cd /Users/fjacquet/Projects/vmware_licenses_exporter && \
 
   Must exit 0.
 
-- [ ] **Step 10: Run the gate one more time.**
+- [x] **Step 10: Run the gate one more time.**
 
 ```bash
 cd /Users/fjacquet/Projects/vmware_licenses_exporter && make ci
 ```
 
-- [ ] **Step 11: Commit.**
+- [x] **Step 11: Commit.**
 
 ```bash
 cd /Users/fjacquet/Projects/vmware_licenses_exporter && \
@@ -1902,20 +1902,20 @@ Port **9107**. All work in `/Users/fjacquet/Projects/veeam_licenses_exporter`.
 - Produces: an exporter serving `/livez` and `/readyz` with an always-200
   `/health`. **No repo code changes** — `main.go` delegates to `core.Main`.
 
-- [ ] **Step 1: Confirm the current pin is `v1.0.1`.**
+- [x] **Step 1: Confirm the current pin is `v1.0.1`.**
 
 ```bash
 cd /Users/fjacquet/Projects/veeam_licenses_exporter && grep -n "licenses-exporter-core" go.mod
 ```
 
-- [ ] **Step 2: Bump and tidy.**
+- [x] **Step 2: Bump and tidy.**
 
 ```bash
 cd /Users/fjacquet/Projects/veeam_licenses_exporter && \
   go get github.com/fjacquet/licenses-exporter-core@v1.1.0 && go mod tidy
 ```
 
-- [ ] **Step 3: Confirm the new pin.**
+- [x] **Step 3: Confirm the new pin.**
 
 ```bash
 cd /Users/fjacquet/Projects/veeam_licenses_exporter && grep -n "licenses-exporter-core" go.mod
@@ -1923,7 +1923,7 @@ cd /Users/fjacquet/Projects/veeam_licenses_exporter && grep -n "licenses-exporte
 
   Expect `github.com/fjacquet/licenses-exporter-core v1.1.0`.
 
-- [ ] **Step 4: Prove the probes are actually served, by running the binary.**
+- [x] **Step 4: Prove the probes are actually served, by running the binary.**
 
 ```bash
 cd /Users/fjacquet/Projects/veeam_licenses_exporter && go build -o /tmp/veeam_probe_check . && \
@@ -1937,13 +1937,13 @@ cd /Users/fjacquet/Projects/veeam_licenses_exporter && go build -o /tmp/veeam_pr
   Expect `/livez -> 200`, `/readyz -> 200`, `/health -> 200 starting`. Enterprise
   Manager being unreachable is fine — the probes are the point.
 
-- [ ] **Step 5: Run the gate.**
+- [x] **Step 5: Run the gate.**
 
 ```bash
 cd /Users/fjacquet/Projects/veeam_licenses_exporter && make ci
 ```
 
-- [ ] **Step 6: Commit.**
+- [x] **Step 6: Commit.**
 
 ```bash
 cd /Users/fjacquet/Projects/veeam_licenses_exporter && git add go.mod go.sum && git commit -m "feat: bump licenses-exporter-core to v1.1.0 for /livez /readyz
@@ -1970,7 +1970,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
   (**breaking**: was distroless `nonroot`, uid `65532`) with a working
   `HEALTHCHECK`; the same `HEALTHCHECK` in the local build image.
 
-- [ ] **Step 1: Replace the whole of `Dockerfile.goreleaser`.** Write exactly:
+- [x] **Step 1: Replace the whole of `Dockerfile.goreleaser`.** Write exactly:
 
 ```dockerfile
 # Release image: copies the prebuilt GoReleaser binary (buildx lays it out per-platform
@@ -2004,7 +2004,7 @@ ENTRYPOINT ["/usr/local/bin/veeam_licenses_exporter"]
 CMD ["--config", "/etc/veeam_licenses_exporter/config.yaml"]
 ```
 
-- [ ] **Step 2: Add the `HEALTHCHECK` to the local `Dockerfile`.** It currently has
+- [x] **Step 2: Add the `HEALTHCHECK` to the local `Dockerfile`.** It currently has
   `EXPOSE 9107` on line 32 and `USER licenses` on line 34. Replace:
 
 ```dockerfile
@@ -2027,7 +2027,7 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
 USER licenses
 ```
 
-- [ ] **Step 3: Run hadolint on both files.**
+- [x] **Step 3: Run hadolint on both files.**
 
 ```bash
 cd /Users/fjacquet/Projects/veeam_licenses_exporter && \
@@ -2037,7 +2037,7 @@ cd /Users/fjacquet/Projects/veeam_licenses_exporter && \
   `DL3025`, `DL3007`, `DL3066` are expected. Add no suppressions. Any other rule
   firing is a real finding — fix it.
 
-- [ ] **Step 4: Build the local image and assert it reports `healthy`.**
+- [x] **Step 4: Build the local image and assert it reports `healthy`.**
 
 ```bash
 cd /Users/fjacquet/Projects/veeam_licenses_exporter && \
@@ -2053,7 +2053,7 @@ cd /Users/fjacquet/Projects/veeam_licenses_exporter && \
   `docker inspect --format='{{json .State.Health.Log}}' veeam_hc_test` before
   changing anything.
 
-- [ ] **Step 5: Confirm the container runs as uid 10001.**
+- [x] **Step 5: Confirm the container runs as uid 10001.**
 
 ```bash
 docker exec veeam_hc_test id
@@ -2061,13 +2061,13 @@ docker exec veeam_hc_test id
 
   Expect `uid=10001(licenses) gid=10001(licenses)`.
 
-- [ ] **Step 6: Tear down.**
+- [x] **Step 6: Tear down.**
 
 ```bash
 docker rm -f veeam_hc_test && docker rmi veeam_licenses_exporter:hc-test
 ```
 
-- [ ] **Step 7: Build the release image the way GoReleaser will, and assert
+- [x] **Step 7: Build the release image the way GoReleaser will, and assert
   `healthy`.**
 
 ```bash
@@ -2089,13 +2089,13 @@ cd /Users/fjacquet/Projects/veeam_licenses_exporter && \
   **Must print `healthy`.** On an amd64 host substitute `amd64` for `arm64`
   throughout; a mismatch produces `exec format error`, not a probe failure.
 
-- [ ] **Step 8: Tear down and clean up.**
+- [x] **Step 8: Tear down and clean up.**
 
 ```bash
 docker rm -f veeam_gr_hc_test && docker rmi veeam_licenses_exporter:gr-hc-test && rm -rf /tmp/veeam_grctx
 ```
 
-- [ ] **Step 9: Commit.**
+- [x] **Step 9: Commit.**
 
 ```bash
 cd /Users/fjacquet/Projects/veeam_licenses_exporter && git add Dockerfile Dockerfile.goreleaser && git commit -m "feat(docker)!: Alpine release image at uid 10001, HEALTHCHECK on /livez
@@ -2122,7 +2122,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 - Produces: a `healthcheck:` on the exporter service in both files, with values
   identical to the Dockerfile's.
 
-- [ ] **Step 1: Add the healthcheck to `docker-compose.yml`.** In the
+- [x] **Step 1: Add the healthcheck to `docker-compose.yml`.** In the
   `veeam_licenses_exporter` service, replace:
 
 ```yaml
@@ -2150,7 +2150,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
   prometheus:
 ```
 
-- [ ] **Step 2: Add the same healthcheck to `docker-compose.ghcr.yml`.** In the
+- [x] **Step 2: Add the same healthcheck to `docker-compose.ghcr.yml`.** In the
   `veeam_licenses_exporter` service, replace:
 
 ```yaml
@@ -2180,7 +2180,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
   prometheus:
 ```
 
-- [ ] **Step 3: Validate both files.**
+- [x] **Step 3: Validate both files.**
 
 ```bash
 cd /Users/fjacquet/Projects/veeam_licenses_exporter && \
@@ -2188,7 +2188,7 @@ cd /Users/fjacquet/Projects/veeam_licenses_exporter && \
   docker compose -f docker-compose.ghcr.yml config -q && echo "both valid"
 ```
 
-- [ ] **Step 4: Confirm the 5s timeout appears in every one of the four places.**
+- [x] **Step 4: Confirm the 5s timeout appears in every one of the four places.**
 
 ```bash
 cd /Users/fjacquet/Projects/veeam_licenses_exporter && \
@@ -2197,7 +2197,7 @@ cd /Users/fjacquet/Projects/veeam_licenses_exporter && \
 
   Expect exactly four hits, one per file.
 
-- [ ] **Step 5: Bring the local stack up and assert the exporter is `healthy`.**
+- [x] **Step 5: Bring the local stack up and assert the exporter is `healthy`.**
   Not the ghcr stack — see Global Constraint 9.
 
 ```bash
@@ -2208,13 +2208,13 @@ cd /Users/fjacquet/Projects/veeam_licenses_exporter && \
 
   **Must print `healthy`.**
 
-- [ ] **Step 6: Tear down.**
+- [x] **Step 6: Tear down.**
 
 ```bash
 cd /Users/fjacquet/Projects/veeam_licenses_exporter && docker compose down
 ```
 
-- [ ] **Step 7: Commit.**
+- [x] **Step 7: Commit.**
 
 ```bash
 cd /Users/fjacquet/Projects/veeam_licenses_exporter && git add docker-compose.yml docker-compose.ghcr.yml && git commit -m "feat(compose): healthcheck the exporter against /livez on 9107
@@ -2241,7 +2241,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
   entries under the **existing** `## [Unreleased]` heading (line 7), and docs that
   no longer claim 503-on-startup or a distroless image.
 
-- [ ] **Step 1: Confirm the next ADR number. Never assume.**
+- [x] **Step 1: Confirm the next ADR number. Never assume.**
 
 ```bash
 ls /Users/fjacquet/Projects/veeam_licenses_exporter/docs/adr/
@@ -2250,7 +2250,7 @@ ls /Users/fjacquet/Projects/veeam_licenses_exporter/docs/adr/
   Expect `0001-consume-core-resty-em.md` and `index.md`, making **`0002`** next.
   If the highest is different, use *that* number + 1 throughout.
 
-- [ ] **Step 2: Create the ADR** at
+- [x] **Step 2: Create the ADR** at
   `docs/adr/0002-livez-readyz-probes-and-alpine-release-image.md`:
 
 ```markdown
@@ -2317,7 +2317,7 @@ needless load and can block behind a slow collection cycle.
 - Engine behaviour arrives by a core version bump, not a local edit (ADR-0001).
 ```
 
-- [ ] **Step 3: Add the index row.** In `docs/adr/index.md`, after the `0001` row
+- [x] **Step 3: Add the index row.** In `docs/adr/index.md`, after the `0001` row
   (line 10), insert:
 
 ```markdown
@@ -2338,7 +2338,7 @@ To add a decision, copy [`0002`](0002-livez-readyz-probes-and-alpine-release-ima
 structure to the next number and link it here.
 ```
 
-- [ ] **Step 4: Add the mkdocs nav entry.** In `mkdocs.yml`, after
+- [x] **Step 4: Add the mkdocs nav entry.** In `mkdocs.yml`, after
   `- 0001 Consume core, resty EM client: adr/0001-consume-core-resty-em.md`
   (line 48), insert:
 
@@ -2346,7 +2346,7 @@ structure to the next number and link it here.
       - 0002 /livez + /readyz probes, Alpine release image: adr/0002-livez-readyz-probes-and-alpine-release-image.md
 ```
 
-- [ ] **Step 5: Fill in the existing `## [Unreleased]` CHANGELOG section.** This
+- [x] **Step 5: Fill in the existing `## [Unreleased]` CHANGELOG section.** This
   file already has `## [Unreleased]` on line 7, immediately followed by
   `## [0.1.2] - 2026-07-10` on line 9. Insert this content between them:
 
@@ -2375,7 +2375,7 @@ structure to the next number and link it here.
   a 503 from `/health` must be updated.
 ```
 
-- [ ] **Step 6: Update `docs/deployment/docker.md`.** Replace lines 30–32:
+- [x] **Step 6: Update `docs/deployment/docker.md`.** Replace lines 30–32:
 
 ```markdown
 `/metrics` and `/health` are both served on `9107`; `/health` returns HTTP 200 with
@@ -2416,7 +2416,7 @@ which copies the prebuilt binary. Published images before the ADR-0002 release
 were `gcr.io/distroless/static:nonroot` at uid `65532`.
 ```
 
-- [ ] **Step 7: Update `README.md`.** Replace line 55:
+- [x] **Step 7: Update `README.md`.** Replace line 55:
 
 ```markdown
 # metrics: http://localhost:9107/metrics   health: http://localhost:9107/health
@@ -2429,7 +2429,7 @@ were `gcr.io/distroless/static:nonroot` at uid `65532`.
 # probes:  http://localhost:9107/livez     http://localhost:9107/readyz  (always 200)
 ```
 
-- [ ] **Step 8: Sweep for falsified claims.**
+- [x] **Step 8: Sweep for falsified claims.**
 
 ```bash
 cd /Users/fjacquet/Projects/veeam_licenses_exporter && \
@@ -2442,7 +2442,7 @@ cd /Users/fjacquet/Projects/veeam_licenses_exporter && \
   the `docs/deployment/docker.md` sentence added in Step 6 — all of which describe
   the *past* state explicitly. Any other hit is a stale user-facing claim: fix it.
 
-- [ ] **Step 9: Build the docs site strictly.**
+- [x] **Step 9: Build the docs site strictly.**
 
 ```bash
 cd /Users/fjacquet/Projects/veeam_licenses_exporter && \
@@ -2451,13 +2451,13 @@ cd /Users/fjacquet/Projects/veeam_licenses_exporter && \
 
   Must exit 0.
 
-- [ ] **Step 10: Run the gate one more time.**
+- [x] **Step 10: Run the gate one more time.**
 
 ```bash
 cd /Users/fjacquet/Projects/veeam_licenses_exporter && make ci
 ```
 
-- [ ] **Step 11: Commit.**
+- [x] **Step 11: Commit.**
 
 ```bash
 cd /Users/fjacquet/Projects/veeam_licenses_exporter && \
@@ -2474,7 +2474,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 Run every item before declaring the plan complete. Each is a command with an
 expected output — evidence, not assertion.
 
-- [ ] **Core serves all four routes and never 503s.**
+- [x] **Core serves all four routes and never 503s.**
 
 ```bash
 cd /Users/fjacquet/Projects/licenses-exporter-core && \
@@ -2484,13 +2484,13 @@ cd /Users/fjacquet/Projects/licenses-exporter-core && \
 
   Expect the first grep to hit; the second must print **nothing**.
 
-- [ ] **Core's gate is green and the tag is published.**
+- [x] **Core's gate is green and the tag is published.**
 
 ```bash
 cd /Users/fjacquet/Projects/licenses-exporter-core && make ci && git ls-remote --tags origin | grep v1.1.0
 ```
 
-- [ ] **All three consumers pin core v1.1.0.**
+- [x] **All three consumers pin core v1.1.0.**
 
 ```bash
 for r in m365_licenses_exporter vmware_licenses_exporter veeam_licenses_exporter; do
@@ -2500,7 +2500,7 @@ done
 
   All three must show `v1.1.0`. Zero must show `v1.0.1`.
 
-- [ ] **No `localhost` anywhere in a healthcheck.**
+- [x] **No `localhost` anywhere in a healthcheck.**
 
 ```bash
 for r in m365_licenses_exporter vmware_licenses_exporter veeam_licenses_exporter; do
@@ -2514,7 +2514,7 @@ done
   Must print **nothing**. (`README.md` may legitimately still say `localhost` in
   a browser URL — that is not a healthcheck.)
 
-- [ ] **The 5s timeout is in all twelve places (4 files × 3 repos).**
+- [x] **The 5s timeout is in all twelve places (4 files × 3 repos).**
 
 ```bash
 for r in m365_licenses_exporter vmware_licenses_exporter veeam_licenses_exporter; do
@@ -2531,7 +2531,7 @@ done
   `grep -rn "timeout: 10s\|timeout=10s" /Users/fjacquet/Projects/{m365,vmware,veeam}_licenses_exporter/docker-compose*.yml /Users/fjacquet/Projects/{m365,vmware,veeam}_licenses_exporter/Dockerfile*`
   must print nothing.
 
-- [ ] **Each repo's `HEALTHCHECK` targets its own port.**
+- [x] **Each repo's `HEALTHCHECK` targets its own port.**
 
 ```bash
 grep -h "127.0.0.1" /Users/fjacquet/Projects/m365_licenses_exporter/Dockerfile* \
@@ -2545,7 +2545,7 @@ grep -h "127.0.0.1" /Users/fjacquet/Projects/veeam_licenses_exporter/Dockerfile*
   Each must print `4`. A cross-wired port (m365 checking 9106) is the single most
   likely copy-paste defect in this plan.
 
-- [ ] **No `distroless`, `65532` or `nonroot` survives outside ADRs, CHANGELOGs and
+- [x] **No `distroless`, `65532` or `nonroot` survives outside ADRs, CHANGELOGs and
   the explicit "before this release" doc sentences.**
 
 ```bash
@@ -2560,7 +2560,7 @@ done
   The only permitted hits are the `docs/deployment/docker.md` sentences that
   explicitly describe the pre-release state. Anything else is a stale claim.
 
-- [ ] **No inline suppressions were added.**
+- [x] **No inline suppressions were added.**
 
 ```bash
 grep -rn "hadolint ignore\|nosemgrep\|//nolint" \
@@ -2572,7 +2572,7 @@ grep -rn "hadolint ignore\|nosemgrep\|//nolint" \
 
   Must print nothing new.
 
-- [ ] **No literal placeholder text was committed.**
+- [x] **No literal placeholder text was committed.**
 
 ```bash
 grep -rn "ADR-000N\|<port>\|TBD" \
@@ -2586,7 +2586,7 @@ grep -rn "ADR-000N\|<port>\|TBD" \
 
   Must print nothing.
 
-- [ ] **Every new ADR has both an index row and a nav entry.**
+- [x] **Every new ADR has both an index row and a nav entry.**
 
 ```bash
 grep -c "0011-livez-readyz" /Users/fjacquet/Projects/m365_licenses_exporter/docs/adr/index.md \
@@ -2600,7 +2600,7 @@ grep -c "0002-livez-readyz" /Users/fjacquet/Projects/veeam_licenses_exporter/doc
   Every count must be `≥1`. (Adjust the numbers if Step 1 of Tasks 9/13/17 found
   different next-numbers.)
 
-- [ ] **Every CHANGELOG has an `## [Unreleased]` section carrying this work.**
+- [x] **Every CHANGELOG has an `## [Unreleased]` section carrying this work.**
 
 ```bash
 for r in m365_licenses_exporter vmware_licenses_exporter veeam_licenses_exporter; do
@@ -2612,7 +2612,7 @@ grep -c "^## \[Unreleased\]" /Users/fjacquet/Projects/licenses-exporter-core/CHA
 
   All four must print `1`. m365's was **created** by this work; core's was too.
 
-- [ ] **All four repos have clean trees and green gates.**
+- [x] **All four repos have clean trees and green gates.**
 
 ```bash
 for r in licenses-exporter-core m365_licenses_exporter vmware_licenses_exporter veeam_licenses_exporter; do
@@ -2625,14 +2625,29 @@ done
   Every `status --porcelain` must be empty (ignoring untracked `site/` and
   `coverage.out` if they are gitignored) and every gate must print `ci OK`.
 
-- [ ] **Runtime health was actually asserted, not just read.** Confirm you ran the
+- [ ] **Runtime health was actually asserted, not just read.** *(Left unticked by
+  the 2026-08-01 paperwork pass: this session found no direct evidence — no
+  running or dangling `hc-test`/`gr-hc-test` images for m365/vmware/veeam — that
+  the six `docker inspect` checks were run. Their absence is also consistent
+  with the plan's own teardown steps having succeeded, so this is genuinely
+  unconfirmed either way, not disproved.)* Confirm you ran the
   `docker inspect --format='{{.State.Health.Status}}'` check and saw `healthy` for
   **six** images: the local and the goreleaser image of each of the three repos
   (Tasks 7/11/15 Steps 4 and 7). If you skipped any because "the Dockerfile looks
   right", go back and run it — that is the exact shortcut that shipped the
   `localhost`/`::1` bug.
 
-- [ ] **Out-of-scope work was not started.** Plans B–E of the spec
+- [ ] **Out-of-scope work was not started.** *(Left unticked by the 2026-08-01
+  paperwork pass: `kemp_exporter`, `nsr_exporter`, `pve_exporter`, and
+  `idrac_exporter` all show a commit dated 2026-08-01 today — e.g. `nsr_exporter`
+  `b8d995d docs(plan): tick completed Task 11 and Self-Review checkboxes`,
+  `pve_exporter e91ca28 docs(changelog): record the startup-ordering and
+  server.uri fixes`. These read as a different, concurrent family-wide effort
+  (health-handler/startup-ordering work per sibling sessions, per the
+  "siblings are being modified concurrently" constraint on this session) rather
+  than this plan's Phase 1–4 scope, but this session has no way to confirm that
+  boundary from the commit messages alone — re-verify against the actual spec
+  before re-ticking.)* Plans B–E of the spec
   (`kemp_exporter` port move, `nsr_exporter`, `pve_exporter`, `idrac_exporter`)
   and the `exporter-standards` skill correction are **not** part of this plan.
   Confirm no commits landed in those repos:

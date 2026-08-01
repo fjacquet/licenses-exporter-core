@@ -32,6 +32,26 @@ against it unchanged).
   bump with a plain `go get`. Anything asserting on a 503 from `/health` — an
   alert rule, a smoke test, a blackbox-exporter check — must be updated.
 
+## [1.0.1] — 2026-07-12
+
+### Changed
+
+- **Go toolchain 1.26.4 → 1.26.5** (`go.mod`), with the transitive dependency
+  set refreshed alongside it: `golang.org/x/sync` v0.21.0 → v0.22.0,
+  `github.com/prometheus/common` v0.66.1 → v0.70.0,
+  `github.com/prometheus/procfs` v0.16.1 → v0.21.1,
+  `golang.org/x/net` v0.55.0 → v0.57.0, `golang.org/x/sys` v0.45.0 → v0.47.0,
+  `golang.org/x/text` v0.37.0 → v0.40.0,
+  `go.opentelemetry.io/proto/otlp` v1.10.0, and
+  `google.golang.org/grpc` v1.81.1; `go.yaml.in/yaml/v2` dropped as a
+  transitive dependency.
+
+### Build
+
+- **`sbom` Make target** (CycloneDX), required by the shared `go-ci.yml`
+  workflow used across the exporter family.
+- **`coverage-upload` Make target**, completing the shared `go-ci` interface.
+
 ## [1.0.0] — 2026-07-02
 
 Stable API. No code changes from `v0.1.0` — this release marks the public API as

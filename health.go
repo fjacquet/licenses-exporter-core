@@ -5,8 +5,13 @@ import (
 	"sync/atomic"
 )
 
-// Health reports 503 "starting" until the first collection cycle completes,
-// then 200 "ok" (design spec §2).
+// Health always answers 200. The ready flag is reported in the BODY —
+// "starting" before the first collection cycle completes, "ok" after — and
+// never as the status code: a 503 here makes an orchestrator's liveness probe
+// restart a process that is merely still doing its first collection, and makes
+// a Docker HEALTHCHECK report the container unhealthy for the whole start-up
+// window. Machine-readable liveness/readiness live at /livez and /readyz
+// (server.go), which read no state at all; /health stays informational.
 type Health struct {
 	ready atomic.Bool
 }
@@ -14,11 +19,10 @@ type Health struct {
 func (h *Health) SetReady() { h.ready.Store(true) }
 
 func (h *Health) ServeHTTP(w http.ResponseWriter, _ *http.Request) {
+	w.WriteHeader(http.StatusOK)
 	if h.ready.Load() {
-		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte("ok"))
 		return
 	}
-	w.WriteHeader(http.StatusServiceUnavailable)
 	_, _ = w.Write([]byte("starting"))
 }

@@ -49,7 +49,7 @@ type Config struct {
 
 **3. A ~30-line `main`** — parse flags (cobra/pflag/stdlib, your choice), then
 build an `App` whose `Load` re-parses config and rebuilds sources. `core.Main`
-runs the whole lifecycle (`--once`, or serve `/metrics` + `/health` with
+runs the whole lifecycle (`--once`, or serve `/metrics`, `/health`, `/livez` + `/readyz` with
 signal + file-watch hot reload):
 
 ```go
@@ -82,6 +82,24 @@ func main() {
 `Load` is called at startup and on every reload, so vendor-config changes
 hot-reload too. `core.Main` builds the serving stack once and swaps only the
 collection loop on reload — `/metrics` never blanks and the socket never rebinds.
+
+### HTTP routes
+
+| Path | Status | Body | Notes |
+|---|---|---|---|
+| `/metrics` | 200 | Prometheus exposition | Rendered from the current snapshot. |
+| `/health` | **always 200** | `starting` until the first collection cycle completes, then `ok` | Informational. The readiness flag is body content, never the status code. |
+| `/livez` | 200 | empty | Reads no state; answers as soon as the listener is bound. |
+| `/readyz` | 200 | empty | Same handler as `/livez`. |
+
+Point container `HEALTHCHECK`s and Kubernetes probes at `/livez` and `/readyz`,
+never at `/metrics`: rendering the full exposition per probe tick is needless
+load and can block behind a slow collection cycle. Because `/readyz` is
+byte-identical to `/livez` and equally state-free, a Kubernetes
+`readinessProbe` marks the pod Ready before the first collection cycle
+completes, so Prometheus may scrape a cold-start snapshot (effectively just
+`license_build_info`) for up to one `collection.interval` after startup — an
+accepted trade for this exporter family, not a defect.
 
 ## Versioning
 

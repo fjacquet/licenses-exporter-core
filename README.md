@@ -94,7 +94,12 @@ collection loop on reload — `/metrics` never blanks and the socket never rebin
 
 Point container `HEALTHCHECK`s and Kubernetes probes at `/livez` and `/readyz`,
 never at `/metrics`: rendering the full exposition per probe tick is needless
-load and can block behind a slow collection cycle.
+load and can block behind a slow collection cycle. Because `/readyz` is
+byte-identical to `/livez` and equally state-free, a Kubernetes
+`readinessProbe` marks the pod Ready before the first collection cycle
+completes, so Prometheus may scrape a cold-start snapshot (effectively just
+`license_build_info`) for up to one `collection.interval` after startup — an
+accepted trade for this exporter family, not a defect.
 
 ## Versioning
 

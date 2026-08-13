@@ -48,19 +48,35 @@ func (b Base) Validate() error {
 	return nil
 }
 
-var envRef = regexp.MustCompile(`\$\{([A-Z0-9_]+)\}`)
+var envRef = regexp.MustCompile(`\$\{([A-Z0-9_]+)(:-[^}]*)?\}`)
 
 // Expand replaces ${VAR} references, failing on any unset variable.
+//
+// A reference may carry a fallback as ${VAR:-default}, borrowing the shell /
+// docker-compose syntax and its meaning: unset OR empty falls back, and the reference
+// never errors. That lets a shipped config.yaml drive a non-secret setting from the
+// environment while still starting on a host that never exported it. Use it only where a
+// safe default exists.
+//
+// A bare ${VAR} fails when the variable is UNSET; an exported-but-empty one expands
+// to the empty string, as it always has.
 func Expand(s string) (string, error) {
 	var missing string
 	out := envRef.ReplaceAllStringFunc(s, func(m string) string {
-		name := envRef.FindStringSubmatch(m)[1]
+		sub := envRef.FindStringSubmatch(m)
+		name, fallback := sub[1], sub[2]
 		v, ok := os.LookupEnv(name)
+		if ok && v != "" {
+			return v
+		}
+		if fallback != "" {
+			return fallback[len(":-"):] // group 2 keeps its ":-" prefix, so "" means absent
+		}
 		if !ok {
 			missing = name
 			return m
 		}
-		return v
+		return ""
 	})
 	if missing != "" {
 		return "", fmt.Errorf("config references unset environment variable %q", missing)

@@ -8,6 +8,17 @@ against it unchanged).
 
 ## [Unreleased]
 
+## [1.1.3] — 2026-10-03
+
+### Changed
+
+- Go toolchain moved to 1.27.1 (`go 1.27.1` in `go.mod`).
+- `golangci-lint` pin bumped v2.12.2 -> v2.13.2 in the `Makefile`.
+- `go.opentelemetry.io/otel` (and the `metric`, `sdk`, `sdk/metric` and
+  `otlpmetricgrpc` modules) 1.46.0 -> 1.47.0 in a full `go get -u ./...` refresh.
+
+## [1.1.2] — 2026-09-13
+
 ### Added
 
 - `${VAR:-default}` fallbacks in config env references, ported from `pscale_exporter`.
@@ -15,6 +26,13 @@ against it unchanged).
   such a reference never aborts startup. A bare `${VAR}` still fails loudly when the
   variable is *unset*; an exported-but-empty one expands to the empty string, as it
   always has.
+
+### Changed
+
+- Dependency refresh: `go.opentelemetry.io/otel` (with `metric`, `sdk`, `sdk/metric`,
+  `otlpmetricgrpc`) 1.44.0 -> 1.46.0, `github.com/sirupsen/logrus` 1.9.4 -> 1.10.2,
+  `golang.org/x/sync` 0.22.0 -> 0.23.0; Go patch level 1.26.5 -> 1.26.6.
+- Dependabot auto-merge workflow added.
 
 ## [1.1.1] — 2026-08-01
 
@@ -176,6 +194,8 @@ per-vendor exporter per corporation, all sharing a single `license_` schema.
   `NewCollector`) once the first consumer confirms it only needs `Main` + the
   sample/store/registry seam.
 
+[1.1.3]: https://github.com/fjacquet/licenses-exporter-core/compare/v1.1.2...v1.1.3
+[1.1.2]: https://github.com/fjacquet/licenses-exporter-core/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/fjacquet/licenses-exporter-core/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/fjacquet/licenses-exporter-core/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/fjacquet/licenses-exporter-core/compare/v1.0.0...v1.0.1

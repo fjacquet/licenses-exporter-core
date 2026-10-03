@@ -5,7 +5,7 @@ COVER   ?= coverage.out
 DIST    ?= dist
 
 # Pinned tool versions (installed by `make tools`).
-GOLANGCI_VERSION ?= v2.12.2
+GOLANGCI_VERSION ?= v2.13.2
 
 .PHONY: all clean install tools lint format test build vuln security sbom \
         coverage-upload ci fmt-check fmt vet test-race test-coverage sure

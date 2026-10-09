@@ -8,6 +8,16 @@ against it unchanged).
 
 ## [Unreleased]
 
+### Security
+
+- Move the Go toolchain to 1.27.2 (`go 1.27.2` in `go.mod`) to fix the standard
+  library vulnerabilities GO-2026-6603, GO-2026-6605, GO-2026-6607, GO-2026-6608,
+  GO-2026-6610, GO-2026-6611, GO-2026-6613 and GO-2026-6617.
+- Update dependencies in a full `go get -u ./...` refresh, including
+  `golang.org/x/net` v0.59.0 -> v0.60.0 (fixes the advisories it carried).
+- Bump the `golangci-lint` pin v2.13.2 -> v2.14.0 in the `Makefile`, since v2.13.2
+  cannot type-check against the Go 1.27.2 standard library.
+
 ## [1.1.3] — 2026-10-03
 
 ### Changed
